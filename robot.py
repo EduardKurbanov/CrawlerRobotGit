@@ -55,8 +55,8 @@ class Robot:
         """
             model sonar: 'HY-SRF05' analog 'HY-SR04',
             import Adafruit_BBIO.GPIO as GPIO,
-            eyes_sonar_trigger_gpio: 'P2_32'
-            eyes_sonar_echo_gpio: 'P2_36',
+            eyes_sonar_trigger_gpio: 'P1_2'
+            eyes_sonar_echo_gpio: 'P1_4',
             :return distance: 'cm'
         """
         print('---init sonar_robot---')
