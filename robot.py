@@ -37,19 +37,19 @@ class Robot:
         PWM.start(self.head_servo_x_pwm, (10.0 - duty_min), 30)
         PWM.start(self.head_servo_y_pwm, (10.0 - duty_min), 30)
 
-        if axis_x:
-            duty = ((float(axis_x) / 180.0) * duty_span + duty_min)
-            PWM.set_duty_cycle(self.head_servo_x_pwm, duty)
-            return f"angle axis_x {axis_x}"
-        elif axis_y:
-            duty = ((float(axis_y) / 180.0) * duty_span + duty_min)
-            PWM.set_duty_cycle(self.head_servo_y_pwm, duty)
-            return f"angle axis_x {axis_y}"
-        else:
+        duty = ((float(axis_x) / 180.0) * duty_span + duty_min)
+        PWM.set_duty_cycle(self.head_servo_x_pwm, duty)
+        print(f"angle axis_x {axis_x}")
+        duty = ((float(axis_y) / 180.0) * duty_span + duty_min)
+        PWM.set_duty_cycle(self.head_servo_y_pwm, duty)
+        print(f"angle axis_y {axis_y}")
+
+        if not (-90.0 <= axis_x <= 90.0) or not (-90.0 <= axis_y <= 90.0):
             PWM.stop(self.head_servo_x_pwm) or PWM.stop(self.head_servo_y_pwm)
             PWM.cleanup()
-            return f"error angle {axis_x} or {axis_y}"
+            return f"error angle {axis_x}"
 
+        return "success"
 
     def eyes_sonar_robot(self) -> float:
         """
@@ -128,7 +128,7 @@ class Robot:
         GPIO.setup(self.engine_left_move_forward_gpio, GPIO.OUT)
         GPIO.setup(self.engine_left_move_back_gpio, GPIO.OUT)
 
-        if motor_left and motor_right == 'forward':
+        if (motor_left == 'forward') and (motor_right == 'forward'):
             print('---motors forward---')
             GPIO.output(self.engine_standby_gpio, GPIO.HIGH)
 
@@ -137,7 +137,7 @@ class Robot:
 
             (GPIO.output(self.engine_left_move_forward_gpio, GPIO.HIGH) and
              GPIO.output(self.engine_left_move_back_gpio, GPIO.LOW))
-        elif motor_left and motor_right == 'back':
+        elif (motor_left == 'back') and (motor_right == 'back'):
             print('---motors back---')
             GPIO.output(self.engine_standby_gpio, GPIO.HIGH)
 
