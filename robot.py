@@ -106,7 +106,7 @@ class Robot:
         """
         pass
 
-    def driver_motor_robot(self, motor_left: str = "", motor_right: str = "") -> None:
+    def driver_motor_robot(self, motor_action: str = "") -> None:
         """
             model driver motor: 'DRV8833'
             import Adafruit_BBIO.GPIO as GPIO,
@@ -128,7 +128,7 @@ class Robot:
         GPIO.setup(self.engine_left_move_forward_gpio, GPIO.OUT)
         GPIO.setup(self.engine_left_move_back_gpio, GPIO.OUT)
 
-        if (motor_left == 'forward') and (motor_right == 'forward'):
+        if motor_action == 'forward':
             print('---motors forward---')
             GPIO.output(self.engine_standby_gpio, GPIO.HIGH)
 
@@ -137,7 +137,7 @@ class Robot:
 
             (GPIO.output(self.engine_left_move_forward_gpio, GPIO.HIGH) and
              GPIO.output(self.engine_left_move_back_gpio, GPIO.LOW))
-        elif (motor_left == 'back') and (motor_right == 'back'):
+        elif motor_action == 'back':
             print('---motors back---')
             GPIO.output(self.engine_standby_gpio, GPIO.HIGH)
 
@@ -146,18 +146,23 @@ class Robot:
 
             (GPIO.output(self.engine_left_move_forward_gpio, GPIO.LOW) and
              GPIO.output(self.engine_left_move_back_gpio, GPIO.HIGH))
-        elif motor_left == 'left':
-            print('---motors left---')
+        elif motor_action == 'right':
+            print('---motors right---')
             GPIO.output(self.engine_standby_gpio, GPIO.HIGH)
 
             (GPIO.output(self.engine_left_move_forward_gpio, GPIO.HIGH) and
              GPIO.output(self.engine_left_move_back_gpio, GPIO.LOW))
-        elif motor_right == 'right':
-            print('---motors right---')
+        elif motor_action == 'left':
+            print('---motors left---')
             GPIO.output(self.engine_standby_gpio, GPIO.HIGH)
 
             (GPIO.output(self.engine_right_move_forward_gpio, GPIO.HIGH) and
              GPIO.output(self.engine_right_move_back_gpio, GPIO.LOW))
+        elif motor_action == 'stop':
+            print('stop motor')
+            GPIO.output(self.engine_standby_gpio, GPIO.LOW)
+            GPIO.cleanup()
+
         else:
             print('---error command, off standby---')
             GPIO.output(self.engine_standby_gpio, GPIO.LOW)
