@@ -115,8 +115,7 @@ class Robot:
             engine_right_move_back_gpio = 'P2_6',
             engine_left_move_forward_gpio = 'P2_8',
             engine_left_move_back_gpio = 'P2_10',
-            motor_left: str: 'forward or back or left',
-            motor_right: str: 'forward or back or right',
+            motor_action: str: 'forward or back or left or stop',
             :return None:
         """
         print('---init driver_motor_robot---')
@@ -162,7 +161,6 @@ class Robot:
             print('stop motor')
             GPIO.output(self.engine_standby_gpio, GPIO.LOW)
             GPIO.cleanup()
-
         else:
             print('---error command, off standby---')
             GPIO.output(self.engine_standby_gpio, GPIO.LOW)
