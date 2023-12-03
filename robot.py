@@ -6,12 +6,12 @@ class Robot:
     """
         tracked robot based on a mini computer PocketBeagle®
     """
-    def __int__(self):
+    def __init__(self):
         print('---init ports---')
         self.head_servo_x_pwm = 'P2_1'
         self.head_servo_y_pwm = 'P2_3'
-        self.eyes_sonar_trigger_gpio = 'P2_32'
-        self.eyes_sonar_echo_gpio = 'P2_36'
+        self.eyes_sonar_trigger_gpio = 'P1_2'
+        self.eyes_sonar_echo_gpio = 'P1_4'
         self.engine_standby_gpio = 'P2_2'
         self.engine_right_move_forward_gpio = 'P2_4'
         self.engine_right_move_back_gpio = 'P2_6'
@@ -63,6 +63,15 @@ class Robot:
         GPIO.cleanup()
         time.sleep(2)
 
+        print(f"trigger: [{self.eyes_sonar_trigger_gpio}]")
+        GPIO.setup(self.eyes_sonar_trigger_gpio, GPIO.OUT)  # Trigger
+        print(f"echo: [{self.eyes_sonar_echo_gpio}]")
+        GPIO.setup(self.eyes_sonar_echo_gpio, GPIO.IN)  # Echo
+        GPIO.output(self.eyes_sonar_trigger_gpio, False)
+        print('Setup completed!')
+        GPIO.output(self.eyes_sonar_trigger_gpio, False)
+        time.sleep(0.5)
+
         GPIO.output(self.eyes_sonar_trigger_gpio, True)
         time.sleep(0.00001)
         GPIO.output(self.eyes_sonar_trigger_gpio, False)
@@ -80,15 +89,6 @@ class Robot:
         pulseDuration = pulseEnd - pulseStart
         distance = pulseDuration * 17150
         distance = round(distance, 2)
-
-        print(f"trigger: [{self.eyes_sonar_trigger_gpio}]")
-        GPIO.setup(self.eyes_sonar_trigger_gpio, GPIO.OUT)  # Trigger
-        print(f"echo: [{self.eyes_sonar_echo_gpio}]")
-        GPIO.setup(self.eyes_sonar_echo_gpio, GPIO.IN)  # Echo
-        GPIO.output(self.eyes_sonar_trigger_gpio, False)
-        print('Setup completed!')
-        GPIO.output(self.eyes_sonar_trigger_gpio, False)
-        time.sleep(0.5)
 
         return distance
 
