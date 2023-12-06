@@ -1,10 +1,13 @@
+from typing import Tuple
 import Adafruit_BBIO.PWM as PWM
 import Adafruit_BBIO.GPIO as GPIO
+import smbus
 import time
 
 class Robot:
     """
         tracked robot based on a mini computer PocketBeagle®
+        model crawler chassis: SN800 19х9х5см
     """
     def __init__(self):
         print('---init ports---')
@@ -99,12 +102,90 @@ class Robot:
         """
         pass
 
-    def gyroscope_accelerometer_robot(self):
+    def gyroscope_accelerometer_robot(self) -> Tuple[float, float, float, float, float, float, float]:
         """
-            model gyroscope: MPU6050
-            :return:
+            model gyroscope: MPU6050,
+            protocol: i2c,
+            i2c_pin_sda: 'P1_26'
+            i2c_pin_scl: 'P1_28'
+            :return: (accel_x, accel_y, accel_x, temp, gyro_x, gyro_y, gyro_z),
         """
-        pass
+        device_address = 0x68
+        _MPU6050_PWR_MGMT_1 = 0x6B  # Primary power/sleep control register
+        _MPU6050_PWR_MGMT_2 = 0x6C
+        _ACCEL_X_OUT_H = 0x3B
+        _ACCEL_X_OUT_L = 0x3C
+        _ACCEL_Y_OUT_H = 0x3D
+        _ACCEL_Y_OUT_L = 0x3E
+        _ACCEL_Z_OUT_H = 0x3F
+        _ACCEL_Z_OUT_L = 0x40
+        _TEMP_OUT_H = 0X41
+        _TEMP_OUT_L = 0X42
+        _GYRO_X_OUT_H = 0x43
+        _GYRO_X_OUT_L = 0x44
+        _GYRO_Y_OUT_H = 0x45
+        _GYRO_Y_OUT_L = 0x46
+        _GYRO_Z_OUT_H = 0x47
+        _GYRO_Z_OUT_L = 0x48
+        _STANDARD_GRAVITY = 9.80665
+
+        _RANGE_2_G_16384_LSB = 16384  # +/- 2g (default value), 16384 LSB/G (default value)
+        _RANGE_4_G_8192_LSB = 8192  # +/- 4g, 8192 LSB/G
+        _RANGE_8_G_4096_LSB = 4096  # +/- 8g, 4096 LSB/G
+        _RANGE_16_G_2048_LSB = 2048  # +/- 16g, 2048 LSB/G
+
+        _RANGE_250_DPS = 131  # +/- 250 deg/s (default value)
+        _RANGE_500_DPS = 65.5  # +/- 500 deg/s
+        _RANGE_1000_DPS = 32.8  # +/- 1000 deg/s
+        _RANGE_2000_DPS = 16.4  # +/- 2000 deg/s
+
+        bus = smbus.SMBus(2)  # The I2C bus number used may need to be changed on your system
+        bus.write_byte_data(device_address, _MPU6050_PWR_MGMT_1, 0)  # Enabling MPU6050
+        time.sleep(1)
+
+        accel_x_h = bus.read_byte_data(device_address, _ACCEL_X_OUT_H)
+        accel_x_l = bus.read_byte_data(device_address, _ACCEL_X_OUT_L)
+        assel_x_hex_bit = (accel_x_h << 8) | accel_x_l
+        signed_hex_assel_x = (int(hex(assel_x_hex_bit), 16) + 2 ** 15) % 2 ** 16 - 2 ** 15
+        accel_x = (signed_hex_assel_x / _RANGE_4_G_8192_LSB) * _STANDARD_GRAVITY
+
+        accel_y_h = bus.read_byte_data(device_address, _ACCEL_Y_OUT_H)
+        accel_y_l = bus.read_byte_data(device_address, _ACCEL_Y_OUT_L)
+        assel_y_hex_bit = (accel_y_h << 8) | accel_y_l
+        signed_hex_assel_y = (int(hex(assel_y_hex_bit), 16) + 2 ** 15) % 2 ** 16 - 2 ** 15
+        accel_y = (signed_hex_assel_y / _RANGE_4_G_8192_LSB) * _STANDARD_GRAVITY
+
+        accel_z_h = bus.read_byte_data(device_address, _ACCEL_Z_OUT_H)
+        accel_z_l = bus.read_byte_data(device_address, _ACCEL_Z_OUT_L)
+        assel_z_hex_bit = (accel_z_h << 8) | accel_z_l
+        signed_hex_assel_z = (int(hex(assel_z_hex_bit), 16) + 2 ** 15) % 2 ** 16 - 2 ** 15
+        accel_z = (signed_hex_assel_z / _RANGE_4_G_8192_LSB) * _STANDARD_GRAVITY
+
+        temp_hex_h = bus.read_byte_data(device_address, _TEMP_OUT_H)
+        temp_hex_l = bus.read_byte_data(device_address, _TEMP_OUT_L)
+        temp_hex_bit = (temp_hex_h << 8) | temp_hex_l
+        signed_hex_temp = (int(hex(temp_hex_bit), 16) + 2 ** 15) % 2 ** 16 - 2 ** 15
+        temp = ((signed_hex_temp) / 340) + 36.53
+
+        gyro_x_h = bus.read_byte_data(device_address, _GYRO_X_OUT_H)
+        gyro_x_l = bus.read_byte_data(device_address, _GYRO_X_OUT_L)
+        gyro_x_hex_bit = (gyro_x_h << 8) | gyro_x_l
+        signed_hex_gyro_x = (int(hex(gyro_x_hex_bit), 16) + 2 ** 15) % 2 ** 16 - 2 ** 15
+        gyro_x = ((signed_hex_gyro_x) / _RANGE_500_DPS)
+
+        gyro_y_h = bus.read_byte_data(device_address, _GYRO_Y_OUT_H)
+        gyro_y_l = bus.read_byte_data(device_address, _GYRO_Y_OUT_L)
+        gyro_y_hex_bit = (gyro_y_h << 8) | gyro_y_l
+        signed_hex_gyro_y = (int(hex(gyro_y_hex_bit), 16) + 2 ** 15) % 2 ** 16 - 2 ** 15
+        gyro_y = ((signed_hex_gyro_y) / _RANGE_500_DPS)
+
+        gyro_z_h = bus.read_byte_data(device_address, _GYRO_Z_OUT_H)
+        gyro_z_l = bus.read_byte_data(device_address, _GYRO_Z_OUT_L)
+        gyro_z_hex_bit = (gyro_z_h << 8) | gyro_z_l
+        signed_hex_gyro_z = (int(hex(gyro_z_hex_bit), 16) + 2 ** 15) % 2 ** 16 - 2 ** 15
+        gyro_z = ((signed_hex_gyro_z) / _RANGE_500_DPS)
+
+        return (accel_x, accel_y, accel_z, temp, gyro_x, gyro_y, gyro_z)
 
     def driver_motor_robot(self, motor_action: str = "") -> None:
         """

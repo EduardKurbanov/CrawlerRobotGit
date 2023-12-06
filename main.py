@@ -1,8 +1,10 @@
-import robot
+#import robot
+
+def main():
+    pass
+
 if __name__ == '__main__':
-    try:
-        pass
-    except:
-        pass
+    main()
+
 
 
