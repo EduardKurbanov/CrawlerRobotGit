@@ -157,24 +157,24 @@ class Robot:
 
         bus = self.i2c_bus  # I2C bus number used, may sometimes change on your system
         bus.write_byte_data(device_address, _MPU6050_PWR_MGMT_1, 0)  # enable MPU6050
-        bus.write_byte_data(device_address, _ACCEL_CONFIG, _ACCEL_RANGE_4G)  # set 4g range for accel
-        bus.write_byte_data(device_address, _GYRO_CONFIG, _GYRO_RANGE_500DEG)  # set 500 range for gyro
+        bus.write_byte_data(device_address, _ACCEL_CONFIG, _ACCEL_RANGE_16G)  # set 16g range for accel
+        bus.write_byte_data(device_address, _GYRO_CONFIG, _GYRO_RANGE_2000DEG)  # set 2000 range for gyro
         time.sleep(1)
 
         accel_x_h = bus.read_byte_data(device_address, _ACCEL_X_OUT_H)
         accel_x_l = bus.read_byte_data(device_address, _ACCEL_X_OUT_L)
         signed_int_assel_x = c_short((accel_x_h << 8) | accel_x_l).value
-        accel_x = (signed_int_assel_x / _RANGE_4_G_8192_LSB) * _STANDARD_GRAVITY
+        accel_x = (signed_int_assel_x / _RANGE_16_G_2048_LSB) * _STANDARD_GRAVITY
 
         accel_y_h = bus.read_byte_data(device_address, _ACCEL_Y_OUT_H)
         accel_y_l = bus.read_byte_data(device_address, _ACCEL_Y_OUT_L)
         signed_int_assel_y = c_short((accel_y_h << 8) | accel_y_l).value
-        accel_y = (signed_int_assel_y / _RANGE_4_G_8192_LSB) * _STANDARD_GRAVITY
+        accel_y = (signed_int_assel_y / _RANGE_16_G_2048_LSB) * _STANDARD_GRAVITY
 
         accel_z_h = bus.read_byte_data(device_address, _ACCEL_Z_OUT_H)
         accel_z_l = bus.read_byte_data(device_address, _ACCEL_Z_OUT_L)
         signed_int_assel_z = c_short((accel_z_h << 8) | accel_z_l).value
-        accel_z = (signed_int_assel_z / _RANGE_4_G_8192_LSB) * _STANDARD_GRAVITY
+        accel_z = (signed_int_assel_z / _RANGE_16_G_2048_LSB) * _STANDARD_GRAVITY
 
         temp_hex_h = bus.read_byte_data(device_address, _TEMP_OUT_H)
         temp_hex_l = bus.read_byte_data(device_address, _TEMP_OUT_L)
@@ -184,17 +184,17 @@ class Robot:
         gyro_x_h = bus.read_byte_data(device_address, _GYRO_X_OUT_H)
         gyro_x_l = bus.read_byte_data(device_address, _GYRO_X_OUT_L)
         signed_int_gyro_x = c_short((gyro_x_h << 8) | gyro_x_l).value
-        gyro_x = ((signed_int_gyro_x) / _RANGE_500_DPS)
+        gyro_x = ((signed_int_gyro_x) / _RANGE_2000_DPS)
 
         gyro_y_h = bus.read_byte_data(device_address, _GYRO_Y_OUT_H)
         gyro_y_l = bus.read_byte_data(device_address, _GYRO_Y_OUT_L)
         signed_int_gyro_y = c_short((gyro_y_h << 8) | gyro_y_l).value
-        gyro_y = ((signed_int_gyro_y) / _RANGE_500_DPS)
+        gyro_y = ((signed_int_gyro_y) / _RANGE_2000_DPS)
 
         gyro_z_h = bus.read_byte_data(device_address, _GYRO_Z_OUT_H)
         gyro_z_l = bus.read_byte_data(device_address, _GYRO_Z_OUT_L)
         signed_int_gyro_z = c_short((gyro_z_h << 8) | gyro_z_l).value
-        gyro_z = ((signed_int_gyro_z) / _RANGE_500_DPS)
+        gyro_z = ((signed_int_gyro_z) / _RANGE_2000_DPS)
 
         return (accel_x, accel_y, accel_z, temp, gyro_x, gyro_y, gyro_z)
 
