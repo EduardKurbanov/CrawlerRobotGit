@@ -112,8 +112,9 @@ class Robot:
             i2c_pin_scl: 'P1_28'
             :return: (accel_x, accel_y, accel_x, temp, gyro_x, gyro_y, gyro_z),
         """
-
+        # address MPU-6050 in i2c
         device_address = 0x68
+        # MPU-6050 Registers
         _MPU6050_PWR_MGMT_1 = 0x6B  # Primary power/sleep control register
         _MPU6050_PWR_MGMT_2 = 0x6C
         _GYRO_CONFIG = 0x1B
@@ -132,22 +133,32 @@ class Robot:
         _GYRO_Y_OUT_L = 0x46
         _GYRO_Z_OUT_H = 0x47
         _GYRO_Z_OUT_L = 0x48
+        # Pre-defined ranges
+        _ACCEL_RANGE_2G = 0x00
+        _ACCEL_RANGE_4G = 0x08
+        _ACCEL_RANGE_8G = 0x10
+        _ACCEL_RANGE_16G = 0x18
+        _GYRO_RANGE_250DEG = 0x00
+        _GYRO_RANGE_500DEG = 0x08
+        _GYRO_RANGE_1000DEG = 0x10
+        _GYRO_RANGE_2000DEG = 0x18
+        # earth gravity
         _STANDARD_GRAVITY = 9.80665
-
-        _RANGE_2_G_16384_LSB = 16384  # +/- 2g (default value), 16384 LSB/G (default value)
-        _RANGE_4_G_8192_LSB = 8192  # +/- 4g, 8192 LSB/G
-        _RANGE_8_G_4096_LSB = 4096  # +/- 8g, 4096 LSB/G
-        _RANGE_16_G_2048_LSB = 2048  # +/- 16g, 2048 LSB/G
-
-        _RANGE_250_DPS = 131  # +/- 250 deg/s (default value)
+        # Modifiers accel
+        _RANGE_2_G_16384_LSB = 16384.0  # +/- 2g (default value), 16384 LSB/G (default value)
+        _RANGE_4_G_8192_LSB = 8192.0  # +/- 4g, 8192 LSB/G
+        _RANGE_8_G_4096_LSB = 4096.0  # +/- 8g, 4096 LSB/G
+        _RANGE_16_G_2048_LSB = 2048.0  # +/- 16g, 2048 LSB/G
+        # Modifiers gyro
+        _RANGE_250_DPS = 131.0  # +/- 250 deg/s (default value)
         _RANGE_500_DPS = 65.5  # +/- 500 deg/s
         _RANGE_1000_DPS = 32.8  # +/- 1000 deg/s
         _RANGE_2000_DPS = 16.4  # +/- 2000 deg/s
 
         bus = self.i2c_bus  # I2C bus number used, may sometimes change on your system
         bus.write_byte_data(device_address, _MPU6050_PWR_MGMT_1, 0)  # enable MPU6050
-        bus.write_byte_data(device_address, _ACCEL_CONFIG, 0x08)  # set 4g range for accel
-        bus.write_byte_data(device_address, _GYRO_CONFIG, 0x08)  # set 500 range for gyro
+        bus.write_byte_data(device_address, _ACCEL_CONFIG, _ACCEL_RANGE_4G)  # set 4g range for accel
+        bus.write_byte_data(device_address, _GYRO_CONFIG, _GYRO_RANGE_500DEG)  # set 500 range for gyro
         time.sleep(1)
 
         accel_x_h = bus.read_byte_data(device_address, _ACCEL_X_OUT_H)
