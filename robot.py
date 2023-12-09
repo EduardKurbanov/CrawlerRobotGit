@@ -111,7 +111,8 @@ class Robot:
             protocol: i2c,
             i2c_pin_sda: 'P1_26'
             i2c_pin_scl: 'P1_28'
-            :return: (accel_x, accel_y, accel_x, temp, gyro_x, gyro_y, gyro_z),
+            :return: (accel_x_gravity, accel_y_gravity, accel_z_gravity, temp, gyro_x, gyro_y, gyro_z, axix_rotation_angle_x,
+                axix_rotation_angle_y)
         """
         # address MPU-6050 in i2c
         device_address = 0x68
