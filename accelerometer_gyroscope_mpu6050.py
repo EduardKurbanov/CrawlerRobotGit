@@ -6,15 +6,13 @@ import math
 
 
 class MPU6050(object):
-
     """
+        for mini computer PocketBeagle®,
         model gyroscope: MPU6050,
         protocol: i2c,
         i2c_pin_sda: 'P1_26'
         i2c_pin_scl: 'P1_28'
     """
-
-
     # address MPU-6050 in i2c
     device_address = 0x68
     _WHO_AM_I = 0x75
