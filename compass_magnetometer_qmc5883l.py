@@ -55,8 +55,9 @@ class QMC5883L(object):
                                      self._REG_FULL_SCALE_RNG_8G)
         self.i2c_bus.write_byte_data(self.device_address, self._REG_QMC5883L_CONF_1,
                                      self._REG_OVERSAMPLING_OSR_256)
-        self.sensitivity_mag = self._FIELD_RANGE_SENSITIVITY_8G_3000LSB_G
         time.sleep(1)
+        self.sensitivity_mag = self._FIELD_RANGE_SENSITIVITY_8G_3000LSB_G
+        
 
     def __convert_data_register_shift(self, high_bit=0, low_bit=0):
         high_bit_ = self.i2c_bus.read_byte_data(self.address_devise, high_bit)
