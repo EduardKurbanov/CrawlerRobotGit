@@ -66,14 +66,18 @@ class MPU6050(object):
         time.sleep(1)
         self.gyro_calibration_data: float = []
 
+    def __convert_data_register_shift(self, high_bit=0, low_bit=0):
+    high_bit_ = self.i2c_bus.read_byte_data(self.address_devise, high_bit)
+    low_bit_ = self.i2c_bus.read_byte_data(self.address_devise, low_bit)
+    signed_int_ = c_short((high_bit_ << 8) | low_bit_).value
+    return signed_int_
+
 
     def accel_axix_x(self) -> Tuple[float, float]:
         """
         :return: tuple(accel_x, accel_x_gravity)
         """
-        accel_x_h = self.i2c_bus.read_byte_data(self.device_address, self._REGISTER_ACCEL_X_OUT_H)
-        accel_x_l = self.i2c_bus.read_byte_data(self.device_address, self._REGISTER_ACCEL_X_OUT_L)
-        signed_int_assel_x = c_short((accel_x_h << 8) | accel_x_l).value
+        signed_int_assel_x = self.__convert_data_register_shift(self._REGISTER_ACCEL_X_OUT_H, self._REGISTER_ACCEL_X_OUT_L)
         accel_x = (signed_int_assel_x / self._ACCEL_RANGE_16_G_2048_LSB)
         accel_x_gravity = accel_x * self._STANDARD_GRAVITY
         return (accel_x, accel_x_gravity)
@@ -82,9 +86,7 @@ class MPU6050(object):
         """
         :return: tuple(accel_y, accel_y_gravity)
         """
-        accel_y_h = self.i2c_bus.read_byte_data(self.device_address, self._REGISTER_ACCEL_Y_OUT_H)
-        accel_y_l = self.i2c_bus.read_byte_data(self.device_address, self._REGISTER_ACCEL_Y_OUT_L)
-        signed_int_assel_y = c_short((accel_y_h << 8) | accel_y_l).value
+        signed_int_assel_y = self.__convert_data_register_shift(self, self._REGISTER_ACCEL_Y_OUT_H, self._REGISTER_ACCEL_Y_OUT_L)
         accel_y = (signed_int_assel_y / self._ACCEL_RANGE_16_G_2048_LSB)
         accel_y_gravity = accel_y * self._STANDARD_GRAVITY
         return (accel_y, accel_y_gravity)
@@ -93,9 +95,7 @@ class MPU6050(object):
         """
         :return: tuple(accel_z, accel_z_gravity)
         """
-        accel_z_h = self.i2c_bus.read_byte_data(self.device_address, self._REGISTER_ACCEL_Z_OUT_H)
-        accel_z_l = self.i2c_bus.read_byte_data(self.device_address, self._REGISTER_ACCEL_Z_OUT_L)
-        signed_int_assel_z = c_short((accel_z_h << 8) | accel_z_l).value
+        signed_int_assel_z = self.__convert_data_register_shift(self, self._REGISTER_ACCEL_Z_OUT_H, self._REGISTER_ACCEL_Z_OUT_L)
         accel_z = (signed_int_assel_z / self._ACCEL_RANGE_16_G_2048_LSB)
         accel_z_gravity = accel_z * self._STANDARD_GRAVITY
         return (accel_z, accel_z_gravity)
@@ -104,9 +104,7 @@ class MPU6050(object):
         """
         :return: temp
         """
-        temp_hex_h = self.i2c_bus.read_byte_data(self.device_address, self._REGISTER_TEMP_OUT_H)
-        temp_hex_l = self.i2c_bus.read_byte_data(self.device_address, self._REGISTER_TEMP_OUT_L)
-        signed_int_temp = c_short((temp_hex_h << 8) | temp_hex_l).value
+        signed_int_temp = self.__convert_data_register_shift(self, self._REGISTER_TEMP_OUT_H, self._REGISTER_TEMP_OUT_L)
         temp = ((signed_int_temp) / 340) + 36.53
         return temp
 
@@ -114,9 +112,7 @@ class MPU6050(object):
         """
         :return: gyro_x
         """
-        gyro_x_h = self.i2c_bus.read_byte_data(self.device_address, self._REGISTER_GYRO_X_OUT_H)
-        gyro_x_l = self.i2c_bus.read_byte_data(self.device_address, self._REGISTER_GYRO_X_OUT_L)
-        signed_int_gyro_x = c_short((gyro_x_h << 8) | gyro_x_l).value
+        signed_int_gyro_x = self.__convert_data_register_shift(self, self._REGISTER_GYRO_X_OUT_H, self._REGISTER_GYRO_X_OUT_L)
         gyro_x = ((signed_int_gyro_x) / self._GYRO_RANGE_2000_DPS)
         return gyro_x
 
@@ -124,9 +120,7 @@ class MPU6050(object):
         """
         :return: gyro_y
         """
-        gyro_y_h = self.i2c_bus.read_byte_data(self.device_address, self._REGISTER_GYRO_Y_OUT_H)
-        gyro_y_l = self.i2c_bus.read_byte_data(self.device_address, self._REGISTER_GYRO_Y_OUT_L)
-        signed_int_gyro_y = c_short((gyro_y_h << 8) | gyro_y_l).value
+        signed_int_gyro_y = self.__convert_data_register_shift(self, self._REGISTER_GYRO_Y_OUT_H, self._REGISTER_GYRO_Y_OUT_L)
         gyro_y = ((signed_int_gyro_y) / self._GYRO_RANGE_2000_DPS)
         return gyro_y
 
@@ -134,9 +128,7 @@ class MPU6050(object):
         """
         :return: gyro_z
         """
-        gyro_z_h = self.i2c_bus.read_byte_data(self.device_address, self._REGISTER_GYRO_Z_OUT_H)
-        gyro_z_l = self.i2c_bus.read_byte_data(self.device_address, self._REGISTER_GYRO_Z_OUT_L)
-        signed_int_gyro_z = c_short((gyro_z_h << 8) | gyro_z_l).value
+        signed_int_gyro_z = self.__convert_data_register_shift(self, self._REGISTER_GYRO_Z_OUT_H, self._REGISTER_GYRO_Z_OUT_L)
         gyro_z = ((signed_int_gyro_z) / self._GYRO_RANGE_2000_DPS)
         return gyro_z
 
