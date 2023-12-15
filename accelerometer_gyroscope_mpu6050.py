@@ -67,11 +67,10 @@ class MPU6050(object):
         self.gyro_calibration_data: float = []
 
     def __convert_data_register_shift(self, high_bit=0, low_bit=0):
-    high_bit_ = self.i2c_bus.read_byte_data(self.address_devise, high_bit)
-    low_bit_ = self.i2c_bus.read_byte_data(self.address_devise, low_bit)
-    signed_int_ = c_short((high_bit_ << 8) | low_bit_).value
-    return signed_int_
-
+        high_bit_ = self.i2c_bus.read_byte_data(self.device_address, high_bit)
+        low_bit_ = self.i2c_bus.read_byte_data(self.device_address, low_bit)
+        signed_int_ = c_short((high_bit_ << 8) | low_bit_).value
+        return signed_int_
 
     def accel_axix_x(self) -> Tuple[float, float]:
         """
@@ -86,7 +85,7 @@ class MPU6050(object):
         """
         :return: tuple(accel_y, accel_y_gravity)
         """
-        signed_int_assel_y = self.__convert_data_register_shift(self, self._REGISTER_ACCEL_Y_OUT_H, self._REGISTER_ACCEL_Y_OUT_L)
+        signed_int_assel_y = self.__convert_data_register_shift(self._REGISTER_ACCEL_Y_OUT_H, self._REGISTER_ACCEL_Y_OUT_L)
         accel_y = (signed_int_assel_y / self._ACCEL_RANGE_16_G_2048_LSB)
         accel_y_gravity = accel_y * self._STANDARD_GRAVITY
         return (accel_y, accel_y_gravity)
@@ -95,7 +94,7 @@ class MPU6050(object):
         """
         :return: tuple(accel_z, accel_z_gravity)
         """
-        signed_int_assel_z = self.__convert_data_register_shift(self, self._REGISTER_ACCEL_Z_OUT_H, self._REGISTER_ACCEL_Z_OUT_L)
+        signed_int_assel_z = self.__convert_data_register_shift(self._REGISTER_ACCEL_Z_OUT_H, self._REGISTER_ACCEL_Z_OUT_L)
         accel_z = (signed_int_assel_z / self._ACCEL_RANGE_16_G_2048_LSB)
         accel_z_gravity = accel_z * self._STANDARD_GRAVITY
         return (accel_z, accel_z_gravity)
@@ -104,7 +103,7 @@ class MPU6050(object):
         """
         :return: temp
         """
-        signed_int_temp = self.__convert_data_register_shift(self, self._REGISTER_TEMP_OUT_H, self._REGISTER_TEMP_OUT_L)
+        signed_int_temp = self.__convert_data_register_shift(self._REGISTER_TEMP_OUT_H, self._REGISTER_TEMP_OUT_L)
         temp = ((signed_int_temp) / 340) + 36.53
         return temp
 
@@ -112,7 +111,7 @@ class MPU6050(object):
         """
         :return: gyro_x
         """
-        signed_int_gyro_x = self.__convert_data_register_shift(self, self._REGISTER_GYRO_X_OUT_H, self._REGISTER_GYRO_X_OUT_L)
+        signed_int_gyro_x = self.__convert_data_register_shift(self._REGISTER_GYRO_X_OUT_H, self._REGISTER_GYRO_X_OUT_L)
         gyro_x = ((signed_int_gyro_x) / self._GYRO_RANGE_2000_DPS)
         return gyro_x
 
@@ -120,7 +119,7 @@ class MPU6050(object):
         """
         :return: gyro_y
         """
-        signed_int_gyro_y = self.__convert_data_register_shift(self, self._REGISTER_GYRO_Y_OUT_H, self._REGISTER_GYRO_Y_OUT_L)
+        signed_int_gyro_y = self.__convert_data_register_shift(self._REGISTER_GYRO_Y_OUT_H, self._REGISTER_GYRO_Y_OUT_L)
         gyro_y = ((signed_int_gyro_y) / self._GYRO_RANGE_2000_DPS)
         return gyro_y
 
@@ -128,7 +127,7 @@ class MPU6050(object):
         """
         :return: gyro_z
         """
-        signed_int_gyro_z = self.__convert_data_register_shift(self, self._REGISTER_GYRO_Z_OUT_H, self._REGISTER_GYRO_Z_OUT_L)
+        signed_int_gyro_z = self.__convert_data_register_shift(self._REGISTER_GYRO_Z_OUT_H, self._REGISTER_GYRO_Z_OUT_L)
         gyro_z = ((signed_int_gyro_z) / self._GYRO_RANGE_2000_DPS)
         return gyro_z
 
@@ -146,9 +145,9 @@ class MPU6050(object):
         return math.degrees(
         math.atan2(-float(self.accel_axix_x()[0]), math.sqrt(float(self.accel_axix_y()[0]) ** 2 + float(self.accel_axix_z()[0]) ** 2)))
 
-    def gyro_calibration(self) -> List[float, float, float]:
+    def gyro_calibration(self) -> List[float]:
         print("---calibration_gyro---")
-        self.gyro_calibration_data: float = [0.0, 0.0, 0.0]
+        self.gyro_calibration_data: List[float] = [0.0, 0.0, 0.0]
 
         for _ in range(2000):
             gyro_x = self.gyro_axix_x()
@@ -172,6 +171,7 @@ while True:
     gyro_x = accel_gyro.gyro_axix_x()
     gyro_x -= g_c[0]
     print(f"gyro_x: {gyro_x}")
+    time.sleep(0.1)
 
 
 

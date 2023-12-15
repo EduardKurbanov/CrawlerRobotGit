@@ -48,7 +48,7 @@ class QMC5883L(object):
         print('---start_init---')
         self.i2c_bus = smbus.SMBus(i2c) # I2C bus number used, may sometimes change on your system
         self.i2c_bus.write_byte_data(self.device_address, self._REG_QMC5883L_CONF_1,
-                                     self._REG_MODE_CONTROL_CONTINUOUS)
+                                     self._REG_MODE_CONTROL_STANDBY)
         self.i2c_bus.write_byte_data(self.device_address, self._REG_QMC5883L_CONF_1,
                                      self._REG_DATA_UPDATE_RATE_ODR_50HZ)
         self.i2c_bus.write_byte_data(self.device_address, self._REG_QMC5883L_CONF_1,
@@ -56,12 +56,12 @@ class QMC5883L(object):
         self.i2c_bus.write_byte_data(self.device_address, self._REG_QMC5883L_CONF_1,
                                      self._REG_OVERSAMPLING_OSR_256)
         time.sleep(1)
-        self.sensitivity_mag = self._FIELD_RANGE_SENSITIVITY_8G_3000LSB_G
+        self.sensitivity_mag = self._FIELD_RANGE_SENSITIVITY_8G_3000LSB_Gz
         
 
     def __convert_data_register_shift(self, high_bit=0, low_bit=0):
-        high_bit_ = self.i2c_bus.read_byte_data(self.address_devise, high_bit)
-        low_bit_ = self.i2c_bus.read_byte_data(self.address_devise, low_bit)
+        high_bit_ = self.i2c_bus.read_byte_data(self.device_address, high_bit)
+        low_bit_ = self.i2c_bus.read_byte_data(self.device_address, low_bit)
         signed_int_ = c_short((high_bit_ << 8) | low_bit_).value
         return signed_int_
 
@@ -74,15 +74,15 @@ class QMC5883L(object):
         temp = ((temp_data_signed_int_) / self._TEMPERATURE_SENSOR_SENSITIVITY)
         return temp
 
-    def get_axis_x_y_z() -> Tuple[float, float, float]:
+    def get_axis_x_y_z(self) -> Tuple[float, float, float]:
         """
         :return: (x, y, z)
         """
-        x = __convert_data_register_shift(self._REG_QMC5883L_DATA_OUTPUT_X_MSB_H, 
+        x = self.__convert_data_register_shift(self._REG_QMC5883L_DATA_OUTPUT_X_MSB_H, 
             self._REG_QMC5883L_DATA_OUTPUT_X_LSB_L) / self.sensitivity_mag
-        y = __convert_data_register_shift(self._REG_QMC5883L_DATA_OUTPUT_Y_MSB_H, 
+        y = self.__convert_data_register_shift(self._REG_QMC5883L_DATA_OUTPUT_Y_MSB_H, 
             self._REG_QMC5883L_DATA_OUTPUT_Y_LSB_L) / self.sensitivity_mag
-        z = __convert_data_register_shift(self._REG_QMC5883L_DATA_OUTPUT_Z_MSB_H, 
+        z = self.__convert_data_register_shift(self._REG_QMC5883L_DATA_OUTPUT_Z_MSB_H, 
             self._REG_QMC5883L_DATA_OUTPUT_Z_LSB_L) / self.sensitivity_mag
         return (x, y ,z)
 
