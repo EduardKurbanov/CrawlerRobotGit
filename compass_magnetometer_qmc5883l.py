@@ -1,6 +1,6 @@
 from typing import Tuple, List
 from ctypes import c_short
-import smbus
+import smbus2
 import time
 import math
 
@@ -27,6 +27,7 @@ class QMC5883L(object):
     _REG_QMC5883L_SET_RESET_PERIOD = 0x0B
     _REG_QMC5883L_RESERVED = 0x0C
     _CHIP_ID = 0x0D
+    
     _REG_DATA_UPDATE_RATE_ODR_10HZ = 0x00
     _REG_DATA_UPDATE_RATE_ODR_50HZ = 0x04
     _REG_DATA_UPDATE_RATE_ODR_100HZ = 0x08
@@ -37,8 +38,19 @@ class QMC5883L(object):
     _REG_OVERSAMPLING_OSR_512 = 0x00
     _REG_FULL_SCALE_RNG_2G = 0x00
     _REG_FULL_SCALE_RNG_8G = 0x10
+    
     _REG_MODE_CONTROL_STANDBY = 0x00
     _REG_MODE_CONTROL_CONTINUOUS = 0x01
+    # Flags for Status Register #1.
+    _REG_STAT_DRDY = 0x01  # Data Ready.
+    _REG_STAT_OVL = 0x02   # Overflow flag.
+    _REG_STAT_DOR = 0x04   # Data skipped for reading.
+    
+    # Flags for Status Register #2.
+    _REG_INT_ENB = 0x01    # Interrupt Pin Enabling.
+    _REG_POL_PNT = 0x40   # Pointer Roll-over.
+    _REG_SOFT_RST = 0x80   # Soft Reset.
+    
     _FIELD_RANGE_SENSITIVITY_2G_12000LSB_G = 12000
     _FIELD_RANGE_SENSITIVITY_8G_3000LSB_G = 3000
     _TEMPERATURE_SENSOR_SENSITIVITY = 100
@@ -46,44 +58,76 @@ class QMC5883L(object):
 
     def __init__(self, i2c: int = 2):
         print('---start_init---')
-        self.i2c_bus = smbus.SMBus(i2c) # I2C bus number used, may sometimes change on your system
-        self.i2c_bus.write_byte_data(self.device_address, self._REG_QMC5883L_CONF_1,
-                                     self._REG_MODE_CONTROL_STANDBY)
-        self.i2c_bus.write_byte_data(self.device_address, self._REG_QMC5883L_CONF_1,
-                                     self._REG_DATA_UPDATE_RATE_ODR_50HZ)
-        self.i2c_bus.write_byte_data(self.device_address, self._REG_QMC5883L_CONF_1,
-                                     self._REG_FULL_SCALE_RNG_8G)
-        self.i2c_bus.write_byte_data(self.device_address, self._REG_QMC5883L_CONF_1,
-                                     self._REG_OVERSAMPLING_OSR_256)
-        time.sleep(1)
-        self.sensitivity_mag = self._FIELD_RANGE_SENSITIVITY_8G_3000LSB_Gz
+        self.i2c_bus = smbus2.SMBus(i2c) # I2C bus number used, may sometimes change on your system
+        self.__check_error()
+        self.mode_cont = (
+            self._REG_MODE_CONTROL_CONTINUOUS | 
+            self._REG_DATA_UPDATE_RATE_ODR_50HZ | 
+            self._REG_FULL_SCALE_RNG_8G | 
+            self._REG_OVERSAMPLING_OSR_512
+            )
+        self.sensitivity_mag = self._FIELD_RANGE_SENSITIVITY_8G_3000LSB_G
+        self.__write_i2c_bus_byte(self._REG_QMC5883L_CONF_2, self._REG_SOFT_RST)
+        self.__write_i2c_bus_byte(self._REG_QMC5883L_CONF_2, self._REG_INT_ENB)
+        self.__write_i2c_bus_byte(self. _REG_QMC5883L_SET_RESET_PERIOD, 0x01)
+        self.__write_i2c_bus_byte(self._REG_QMC5883L_CONF_1, self.mode_cont)
         
+    def __check_error(self):
+        try:
+            chip_id = self.__read_i2c_bus_byte(self._CHIP_ID)
+            if chip_id != 0xff:
+                print(f"Chip ID returned 0x{chip_id:x} instead of 0xff; is it the wrong chip?")
+        except OSError as e:
+            print(f"I2C Error: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
 
-    def __convert_data_register_shift(self, high_bit=0, low_bit=0):
-        high_bit_ = self.i2c_bus.read_byte_data(self.device_address, high_bit)
-        low_bit_ = self.i2c_bus.read_byte_data(self.device_address, low_bit)
-        signed_int_ = c_short((high_bit_ << 8) | low_bit_).value
-        return signed_int_
+    def __write_i2c_bus_byte(self, registry, value):
+        return self.i2c_bus.write_byte_data(self.device_address, registry, value)
+        
+    def __read_i2c_bus_byte(self, registry):
+        return self.i2c_bus.read_byte_data(self.device_address, registry)
+
+    def __read_block_data(self):
+        return self.i2c_bus.read_i2c_block_data(self.device_address, self._REG_QMC5883L_DATA_OUTPUT_X_LSB_L, 8)
+        
+    def __register_shift(self, high_bit_, low_bit_):
+        return c_short((high_bit_ << 8) | low_bit_).value
+        
+    def get_convert_data_signet_int(self):
+        """
+        :return: (axix_x_signet_int, axix_y_signet_int, axix_z_signet_int, temp_signet_int)
+        """
+        x_l, x_h, y_l, y_h, z_l, z_h, t_l, t_h = self.__read_block_data()
+        axix_x_signet_int = self.__register_shift(x_h, x_l)
+        axix_y_signet_int = self.__register_shift(y_h, y_l)
+        axix_z_signet_int = self.__register_shift(z_h, z_l)
+        temp_signet_int = self.__register_shift(t_h, t_l)
+        return (axix_x_signet_int, axix_y_signet_int, axix_z_signet_int, temp_signet_int)
 
     def get_temp(self) -> float:
         """
         :return: temp
         """
-        temp_data_signed_int_ = self.__convert_data_register_shift(self._REG_QMC5883L_TEMP_OUT_H,
-                                                                   self._REG_QMC5883L_TEMP_OUT_L)
-        temp = ((temp_data_signed_int_) / self._TEMPERATURE_SENSOR_SENSITIVITY)
+        temp = ((self.get_convert_data_signet_int()[3]) / self._TEMPERATURE_SENSOR_SENSITIVITY)
         return temp
 
-    def get_axis_x_y_z(self) -> Tuple[float, float, float]:
+    def get_axix_x_y_z(self) -> Tuple[float, float, float]:
         """
         :return: (x, y, z)
         """
-        x = self.__convert_data_register_shift(self._REG_QMC5883L_DATA_OUTPUT_X_MSB_H, 
-            self._REG_QMC5883L_DATA_OUTPUT_X_LSB_L) / self.sensitivity_mag
-        y = self.__convert_data_register_shift(self._REG_QMC5883L_DATA_OUTPUT_Y_MSB_H, 
-            self._REG_QMC5883L_DATA_OUTPUT_Y_LSB_L) / self.sensitivity_mag
-        z = self.__convert_data_register_shift(self._REG_QMC5883L_DATA_OUTPUT_Z_MSB_H, 
-            self._REG_QMC5883L_DATA_OUTPUT_Z_LSB_L) / self.sensitivity_mag
+        x = math.degrees(self.get_convert_data_signet_int()[0] / self.sensitivity_mag)
+        y = math.degrees(self.get_convert_data_signet_int()[1] / self.sensitivity_mag)
+        z = math.degrees(self.get_convert_data_signet_int()[2] / self.sensitivity_mag)
         return (x, y ,z)
+
+m = QMC5883L()
+while True:
+   
+    print(m.get_convert_data_signet_int())
+    print(m.get_temp())
+    print(m.get_axix_x_y_z())
+    time.sleep(1)
+    # TODO: write code...
 
 
