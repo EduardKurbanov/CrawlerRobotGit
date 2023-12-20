@@ -175,5 +175,10 @@ class Robot(object):
     def module_diagnostics(self):
         pass
 
+    def discharge_controller(self):
+        pass
+
+
+
 
 
