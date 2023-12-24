@@ -4,6 +4,7 @@ import smbus
 import time
 import math
 
+
 class HMC5883L(object):
     """
         for mini computer PocketBeagle®,
@@ -12,6 +13,8 @@ class HMC5883L(object):
         i2c_pin_sda: 'P1_26'
         i2c_pin_scl: 'P1_28'
     """
+
     def __init__(self):
         pass
+
     pass

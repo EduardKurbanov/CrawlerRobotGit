@@ -59,10 +59,12 @@ class MPU6050(object):
 
     def __init__(self, i2c: int = 2):
         print('---start_init---')
-        self.i2c_bus = smbus.SMBus(i2c) # I2C bus number used, may sometimes change on your system
+        self.i2c_bus = smbus.SMBus(i2c)  # I2C bus number used, may sometimes change on your system
         self.i2c_bus.write_byte_data(self.device_address, self._REGISTER_MPU6050_PWR_MGMT_1, 0x00)  # enable MPU6050
-        self.i2c_bus.write_byte_data(self.device_address, self._REGISTER_ACCEL_CONFIG, self._REGISTER_ACCEL_RANGE_16G)  # set 16g range for accel
-        self.i2c_bus.write_byte_data(self.device_address, self._REGISTER_GYRO_CONFIG, self._REGISTER_GYRO_RANGE_2000DEG)  # set 2000 range for gyro
+        self.i2c_bus.write_byte_data(self.device_address, self._REGISTER_ACCEL_CONFIG,
+                                     self._REGISTER_ACCEL_RANGE_16G)  # set 16g range for accel
+        self.i2c_bus.write_byte_data(self.device_address, self._REGISTER_GYRO_CONFIG,
+                                     self._REGISTER_GYRO_RANGE_2000DEG)  # set 2000 range for gyro
         time.sleep(1)
         self.gyro_calibration_data: float = []
 
@@ -76,7 +78,8 @@ class MPU6050(object):
         """
         :return: tuple(accel_x, accel_x_gravity)
         """
-        signed_int_assel_x = self.__convert_data_register_shift(self._REGISTER_ACCEL_X_OUT_H, self._REGISTER_ACCEL_X_OUT_L)
+        signed_int_assel_x = self.__convert_data_register_shift(self._REGISTER_ACCEL_X_OUT_H,
+                                                                self._REGISTER_ACCEL_X_OUT_L)
         accel_x = (signed_int_assel_x / self._ACCEL_RANGE_16_G_2048_LSB)
         accel_x_gravity = accel_x * self._STANDARD_GRAVITY
         return (accel_x, accel_x_gravity)
@@ -85,7 +88,8 @@ class MPU6050(object):
         """
         :return: tuple(accel_y, accel_y_gravity)
         """
-        signed_int_assel_y = self.__convert_data_register_shift(self._REGISTER_ACCEL_Y_OUT_H, self._REGISTER_ACCEL_Y_OUT_L)
+        signed_int_assel_y = self.__convert_data_register_shift(self._REGISTER_ACCEL_Y_OUT_H,
+                                                                self._REGISTER_ACCEL_Y_OUT_L)
         accel_y = (signed_int_assel_y / self._ACCEL_RANGE_16_G_2048_LSB)
         accel_y_gravity = accel_y * self._STANDARD_GRAVITY
         return (accel_y, accel_y_gravity)
@@ -94,7 +98,8 @@ class MPU6050(object):
         """
         :return: tuple(accel_z, accel_z_gravity)
         """
-        signed_int_assel_z = self.__convert_data_register_shift(self._REGISTER_ACCEL_Z_OUT_H, self._REGISTER_ACCEL_Z_OUT_L)
+        signed_int_assel_z = self.__convert_data_register_shift(self._REGISTER_ACCEL_Z_OUT_H,
+                                                                self._REGISTER_ACCEL_Z_OUT_L)
         accel_z = (signed_int_assel_z / self._ACCEL_RANGE_16_G_2048_LSB)
         accel_z_gravity = accel_z * self._STANDARD_GRAVITY
         return (accel_z, accel_z_gravity)
@@ -136,14 +141,16 @@ class MPU6050(object):
         :return: axix_rotation_angle_x
         """
         return math.degrees(
-            math.atan2(float(self.accel_axix_y()[0]), math.sqrt(float(self.accel_axix_x()[0]) ** 2 + float(self.accel_axix_z()[0]) ** 2)))
+            math.atan2(float(self.accel_axix_y()[0]),
+                       math.sqrt(float(self.accel_axix_x()[0]) ** 2 + float(self.accel_axix_z()[0]) ** 2)))
 
     def axix_rotation_angle_y(self) -> float:
         """
         :return: axix_rotation_angle_y
         """
         return math.degrees(
-        math.atan2(-float(self.accel_axix_x()[0]), math.sqrt(float(self.accel_axix_y()[0]) ** 2 + float(self.accel_axix_z()[0]) ** 2)))
+            math.atan2(-float(self.accel_axix_x()[0]),
+                       math.sqrt(float(self.accel_axix_y()[0]) ** 2 + float(self.accel_axix_z()[0]) ** 2)))
 
     def gyro_calibration(self) -> List[float]:
         print("---calibration_gyro---")
@@ -162,6 +169,7 @@ class MPU6050(object):
         print("---calibration_gyro_successfully---")
         return self.gyro_calibration_data
 
+
 accel_gyro = MPU6050()
 g_c = accel_gyro.gyro_calibration()
 
@@ -172,9 +180,3 @@ while True:
     gyro_x -= g_c[0]
     print(f"gyro_x: {gyro_x}")
     time.sleep(0.1)
-
-
-
-
-
-

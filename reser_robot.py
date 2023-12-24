@@ -8,11 +8,13 @@ import math
 from accelerometer_gyroscope_mpu6050 import MPU6050
 from compass_magnetometer_hmc5883l import HMC5883L
 
+
 class Robot(object):
     """
         tracked robot based on a mini computer PocketBeagle®
         model crawler chassis: SN800 19х9х5см
     """
+
     def __init__(self):
         print('---init ports---')
         self.head_servo_x_pwm = 'P2_1'
@@ -24,8 +26,7 @@ class Robot(object):
         self.engine_right_move_back_gpio = 'P2_6'
         self.engine_left_move_forward_gpio = 'P2_8'
         self.engine_left_move_back_gpio = 'P2_10'
-        #self.i2c_bus = smbus.SMBus(2)
-
+        # self.i2c_bus = smbus.SMBus(2)
 
     def servo_head_robot(self, axis_x: float = 0.0, axis_y: float = 0.0) -> str:
         """
@@ -111,7 +112,6 @@ class Robot(object):
         dd = MPU6050()
         pass
 
-
     def driver_motor_robot(self, motor_action: str = "") -> None:
         """
             model driver motor: 'DRV8833'
@@ -177,8 +177,3 @@ class Robot(object):
 
     def discharge_controller(self):
         pass
-
-
-
-
-
