@@ -1,6 +1,6 @@
 from typing import Tuple, List
 from ctypes import c_short
-import smbus
+import smbus2
 import time
 import math
 
@@ -59,7 +59,7 @@ class MPU6050(object):
 
     def __init__(self, i2c: int = 2):
         print('---start_init---')
-        self.i2c_bus = smbus.SMBus(i2c)  # I2C bus number used, may sometimes change on your system
+        self.i2c_bus = smbus2.SMBus(i2c)  # I2C bus number used, may sometimes change on your system
         self.i2c_bus.write_byte_data(self.device_address, self._REGISTER_MPU6050_PWR_MGMT_1, 0x00)  # enable MPU6050
         self.i2c_bus.write_byte_data(self.device_address, self._REGISTER_ACCEL_CONFIG,
                                      self._REGISTER_ACCEL_RANGE_16G)  # set 16g range for accel
