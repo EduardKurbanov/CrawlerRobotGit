@@ -6,7 +6,10 @@
 #import sonar_hy_srf05
 
 def main():
-    print(hex(3<<1))
+    print(hex(7<<12))
+
+
+
 
 
 if __name__ == '__main__':
