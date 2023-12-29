@@ -96,7 +96,7 @@ class ADS1115(object):
         except:
             raise IOError("Could not find i2c device")
 
-    def __mode_cont(self, channel_adc=0, pga_adc=6144, sps_adc=250):
+    def __mode_cont(self, channel_adc: int = 0, pga_adc: int = 6144, sps_adc: int = 250):
 
         if channel_adc not in self.channel_adc_ads1115:
             raise ValueError("Wrong channel, use channel 0-3")
@@ -128,7 +128,7 @@ class ADS1115(object):
     def __read_i2c_bus_byte(self, registry, value):
         return self.i2c_bus.read_i2c_block_data(self.device_address, registry, value)
 
-    def get_read_adc(self, channel_adc, pga_adc=6144, sps_adc=250):
+    def get_read_adc(self, channel_adc: int = 0, pga_adc: int = 6144, sps_adc: int = 250) -> float:
         self.__write_i2c_bus_byte(self._REG_ADS1115_ADDRESS_POINTER_CONFIG,
                                   self.__mode_cont(channel_adc, pga_adc, sps_adc))
         delay = 1.0 / sps_adc + 0.0001
