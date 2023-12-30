@@ -35,7 +35,7 @@ class SG90(object):
 
         return "success"
 
-    def servo_axis_y(self, axis_x: float = 0.0, axis_y: float = 0.0) -> str:
+    def servo_axis_y(self, axis_y: float = 0.0) -> str:
         """
            model servo: 'sg90',
            import Adafruit_BBIO.PWM as PWM,
@@ -54,7 +54,7 @@ class SG90(object):
         PWM.set_duty_cycle(self.head_servo_y_pwm, duty)
         print(f"angle axis_y {axis_y}")
 
-        if not (-90.0 <= axis_x <= 90.0):
+        if not (-90.0 <= axis_y <= 90.0):
             PWM.stop(self.head_servo_y_pwm)
             PWM.cleanup()
             return f"error angle {axis_y}"
