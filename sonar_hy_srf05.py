@@ -20,16 +20,13 @@ class HY_SRF05(object):
         """
         print('---init sonar---')
         GPIO.cleanup()
-        time.sleep(2)
+        time.sleep(0.1)
 
-        print(f"trigger: [{self.eyes_sonar_trigger_gpio}]")
         GPIO.setup(self.eyes_sonar_trigger_gpio, GPIO.OUT)  # Trigger
-        print(f"echo: [{self.eyes_sonar_echo_gpio}]")
         GPIO.setup(self.eyes_sonar_echo_gpio, GPIO.IN)  # Echo
         GPIO.output(self.eyes_sonar_trigger_gpio, False)
-        print('Setup completed!')
         GPIO.output(self.eyes_sonar_trigger_gpio, False)
-        time.sleep(0.5)
+        time.sleep(0.1)
 
         GPIO.output(self.eyes_sonar_trigger_gpio, True)
         time.sleep(0.00001)

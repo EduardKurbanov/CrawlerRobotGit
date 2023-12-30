@@ -13,6 +13,17 @@ class DVR8833(object):
         self.engine_right_move_back_gpio = 'P2_6'
         self.engine_left_move_forward_gpio = 'P2_8'
         self.engine_left_move_back_gpio = 'P2_10'
+        self.__gpio_init_driver_motor()
+
+    def __gpio_init_driver_motor(self):
+        print('---init driver_motor_robot---')
+        #GPIO.cleanup()
+        #time.sleep(0.1)
+        GPIO.setup(self.engine_standby_gpio, GPIO.OUT)
+        GPIO.setup(self.engine_right_move_forward_gpio, GPIO.OUT)
+        GPIO.setup(self.engine_right_move_back_gpio, GPIO.OUT)
+        GPIO.setup(self.engine_left_move_forward_gpio, GPIO.OUT)
+        GPIO.setup(self.engine_left_move_back_gpio, GPIO.OUT)
 
     def driver_motor(self, motor_action: str = "") -> None:
         """
@@ -26,14 +37,6 @@ class DVR8833(object):
             motor_action: str: 'forward or back or left or stop',
             :return None:
         """
-        print('---init driver_motor_robot---')
-        GPIO.cleanup()
-        time.sleep(2)
-        GPIO.setup(self.engine_standby_gpio, GPIO.OUT)
-        GPIO.setup(self.engine_right_move_forward_gpio, GPIO.OUT)
-        GPIO.setup(self.engine_right_move_back_gpio, GPIO.OUT)
-        GPIO.setup(self.engine_left_move_forward_gpio, GPIO.OUT)
-        GPIO.setup(self.engine_left_move_back_gpio, GPIO.OUT)
 
         if motor_action == 'forward':
             print('---motors forward---')
