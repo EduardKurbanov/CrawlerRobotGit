@@ -9,6 +9,8 @@ class HY_SRF05(object):
         print('---init ports hy_srf05---')
         self.eyes_sonar_trigger_gpio = 'P1_2'
         self.eyes_sonar_echo_gpio = 'P1_4'
+        GPIO.setup(self.eyes_sonar_trigger_gpio, GPIO.OUT)  # Trigger
+        GPIO.setup(self.eyes_sonar_echo_gpio, GPIO.IN)  # Echo
 
     def eyes_sonar(self) -> float:
         """
@@ -19,12 +21,7 @@ class HY_SRF05(object):
             :return distance: 'cm'
         """
         print('---init sonar---')
-        GPIO.cleanup()
-        time.sleep(0.1)
-
-        GPIO.setup(self.eyes_sonar_trigger_gpio, GPIO.OUT)  # Trigger
-        GPIO.setup(self.eyes_sonar_echo_gpio, GPIO.IN)  # Echo
-        GPIO.output(self.eyes_sonar_trigger_gpio, False)
+        #GPIO.cleanup()
         GPIO.output(self.eyes_sonar_trigger_gpio, False)
         time.sleep(0.1)
 

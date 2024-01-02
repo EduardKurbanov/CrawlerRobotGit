@@ -177,3 +177,95 @@ class Robot(object):
 
     def discharge_controller(self):
         pass
+
+"""
+class SG90(object):
+    def __init__(self):
+        print('---init ports sg90---')
+        self.head_servo_x_pwm = 'P2_1'
+        self.head_servo_y_pwm = 'P2_3'
+
+    def servo_axis_x(self, axis_x: float = 0.0) -> str:
+        
+           model servo: 'sg90',
+           import Adafruit_BBIO.PWM as PWM,
+           pwm1 pin: 'P2_1',
+           axis_x: float: '-90.0 - 0.0 - 90.0',
+           :return srt
+        
+        print('---init servo_head_robot---')
+        duty_min = 5.0
+        duty_max = 10.0
+        duty_span = duty_max - duty_min
+
+        PWM.start(self.head_servo_x_pwm, (10.0 - duty_min), 30)
+
+        duty = ((float(axis_x) / 180.0) * duty_span + duty_min)
+        PWM.set_duty_cycle(self.head_servo_x_pwm, duty)
+        print(f"angle axis_x {axis_x}")
+
+        if not (-90.0 <= axis_x <= 90.0):
+            PWM.stop(self.head_servo_x_pwm)
+            PWM.cleanup()
+            return f"error angle {axis_x}"
+
+        return "success"
+
+    def servo_axis_y(self, axis_y: float = 0.0) -> str:
+        
+           model servo: 'sg90',
+           import Adafruit_BBIO.PWM as PWM,
+           pwm2 pin: 'P2_3',
+           axis_y: float: '-90.0 - 0.0 - 90.0',
+           :return srt
+        
+        print('---init servo_head_robot---')
+        duty_min = 5.0
+        duty_max = 10.0
+        duty_span = duty_max - duty_min
+
+        PWM.start(self.head_servo_y_pwm, (10.0 - duty_min), 30)
+
+        duty = ((float(axis_y) / 180.0) * duty_span + duty_min)
+        PWM.set_duty_cycle(self.head_servo_y_pwm, duty)
+        print(f"angle axis_y {axis_y}")
+
+        if not (-90.0 <= axis_y <= 90.0):
+            PWM.stop(self.head_servo_y_pwm)
+            PWM.cleanup()
+            return f"error angle {axis_y}"
+
+        return "success"
+"""
+
+"""
+class SG90(object):
+    head_servo_x_pwm = 'P2_1'
+    head_servo_y_pwm = 'P2_3'
+    duty_min = 5.0
+    duty_max = 10.0
+
+    def __init__(self):
+        print('---init ports sg90---')
+        PWM.start(self.head_servo_x_pwm, (10.0 - self.duty_min), 30)
+        PWM.start(self.head_servo_y_pwm, (10.0 - self.duty_min), 30)
+
+    def _set_servo_position(self, pwm_pin, axis_value, axis_name):
+        duty_span = self.duty_max - self.duty_min
+        duty = ((float(axis_value) / 180.0) * duty_span + self.duty_min)
+        PWM.set_duty_cycle(pwm_pin, duty)
+        print(f"angle {axis_name} {axis_value}")
+
+        if not (-90.0 <= axis_value <= 90.0):
+            PWM.stop(pwm_pin)
+            PWM.cleanup()
+            return f"error angle {axis_value}"
+
+        return "success"
+
+    def servo_axis_x(self, axis_x: float = 0.0) -> str:
+        return self._set_servo_position(self.head_servo_x_pwm, axis_x, 'axis_x')
+
+    def servo_axis_y(self, axis_y: float = 0.0) -> str:
+        return self._set_servo_position(self.head_servo_y_pwm, axis_y, 'axis_y')
+"""
