@@ -7,8 +7,8 @@ import time
 class HY_SRF05(object):
     def __init__(self):
         print('---init ports hy_srf05---')
-        self.eyes_sonar_trigger_gpio = 'P1_2'
-        self.eyes_sonar_echo_gpio = 'P1_4'
+        self.eyes_sonar_trigger_gpio = 'P2_35'
+        self.eyes_sonar_echo_gpio = 'P2_33'
         GPIO.setup(self.eyes_sonar_trigger_gpio, GPIO.OUT)  # Trigger
         GPIO.setup(self.eyes_sonar_echo_gpio, GPIO.IN)  # Echo
 

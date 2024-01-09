@@ -8,9 +8,9 @@ import time
 class DVR8833(object):
     def __init__(self):
         print('---init ports dvr8833---')
-        self.engine_standby_gpio = 'P2_2'
+        self.engine_standby_gpio = 'P2_6'
         self.engine_right_move_forward_gpio = 'P2_4'
-        self.engine_right_move_back_gpio = 'P2_6'
+        self.engine_right_move_back_gpio = 'P2_2'
         self.engine_left_move_forward_gpio = 'P2_8'
         self.engine_left_move_back_gpio = 'P2_10'
         self.__gpio_init_driver_motor()

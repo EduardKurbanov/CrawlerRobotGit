@@ -12,8 +12,8 @@ class SG90(object):
 
     def __init__(self):
         print('---init ports sg90---')
-        self.head_servo_x_pwm = 'P2_1'
-        self.head_servo_y_pwm = 'P2_3'
+        self.head_servo_x_pwm = 'P1_36'
+        self.head_servo_y_pwm = 'P1_33'
         PWM.start(self.head_servo_x_pwm, self.__DUTY_CONST, 50)
         PWM.start(self.head_servo_y_pwm, self.__DUTY_CONST, 50)
 
