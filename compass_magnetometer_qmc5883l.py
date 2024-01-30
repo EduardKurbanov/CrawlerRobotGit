@@ -72,6 +72,11 @@ class QMC5883L(object):
         self.__write_i2c_bus_byte(self._REG_QMC5883L_SET_RESET_PERIOD, 0x01)
         self.__write_i2c_bus_byte(self._REG_QMC5883L_CONF_1, self.mode_cont)
 
+        self.__declination = 8.22
+        self.__calibration = [[1.0, 0.0, 0.0],
+                             [0.0, 1.0, 0.0],
+                             [0.0, 0.0, 1.0]]
+
     def __check_error(self):
         try:
             chip_id = self.__read_i2c_bus_byte(self._CHIP_ID)
@@ -94,7 +99,7 @@ class QMC5883L(object):
     def __register_shift(self, high_bit_, low_bit_):
         return c_short((high_bit_ << 8) | low_bit_).value
 
-    def get_convert_data_signet_int(self):
+    def __convert_data_signet_int(self):
         """
         :return: (axix_x_signet_int, axix_y_signet_int, axix_z_signet_int, temp_signet_int)
         """
@@ -109,17 +114,33 @@ class QMC5883L(object):
         """
         :return: temp
         """
-        temp = ((self.get_convert_data_signet_int()[3]) / self._TEMPERATURE_SENSOR_SENSITIVITY)
+        temp = ((self.__convert_data_signet_int()[3]) / self._TEMPERATURE_SENSOR_SENSITIVITY)
         return temp
 
-    def get_axix_x_y_z(self) -> float:
+    def get_axix_x_y_z(self) -> Tuple:
         """
-        :return: degrees
+        :return: (x, y, z)
         """
-        x = self.get_convert_data_signet_int()[0] / self.sensitivity_mag
-        y = self.get_convert_data_signet_int()[1] / self.sensitivity_mag
-        z = self.get_convert_data_signet_int()[2] / self.sensitivity_mag
+        x = self.__convert_data_signet_int()[0] / self.sensitivity_mag
+        y = self.__convert_data_signet_int()[1] / self.sensitivity_mag
+        z = self.__convert_data_signet_int()[2] / self.sensitivity_mag
         
+        return (x, y, z)
+
+    def get_magnet(self) -> List:
+        """Return the horizontal magnetic sensor vector with (x, y) calibration applied."""
+        [x, y, z] = self.get_axix_x_y_z()
+        if x is None or y is None:
+            [x1, y1] = [x, y]
+        else:
+            c = self.__calibration
+            x1 = x * c[0][0] + y * c[0][1] + c[0][2]
+            y1 = x * c[1][0] + y * c[1][1] + c[1][2]
+        return [x1, y1]
+
+    def get_bearing_raw(self) -> float:
+        """Horizontal bearing (in degrees) from magnetic value X and Y."""
+        [x, y, z] = self.get_axix_x_y_z()
         if x is None or y is None:
             return None
         else:
@@ -128,11 +149,26 @@ class QMC5883L(object):
                 degrees += 360.0
             return degrees
 
+    def get_bearing(self) -> float:
+        """Horizontal bearing, adjusted by calibration and declination."""
+        [x, y] = self.get_magnet()
+        if x is None or y is None:
+            return None
+        else:
+            degrees = math.degrees(math.atan2(y, x))
+            if degrees < 0:
+                degrees += 360.0
+            degrees += self.__declination
+            if degrees < 0.0:
+                degrees += 360.0
+            elif degrees >= 360.0:
+                degrees -= 360.0
+        return degrees
+
 
 m = QMC5883L()
 while True:
-    print(m.get_convert_data_signet_int())
     print(m.get_temp())
-    print(m.get_axix_x_y_z())
+    print(m.get_bearing())
     time.sleep(1)
     # TODO: write code...
