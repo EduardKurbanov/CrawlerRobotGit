@@ -112,14 +112,21 @@ class QMC5883L(object):
         temp = ((self.get_convert_data_signet_int()[3]) / self._TEMPERATURE_SENSOR_SENSITIVITY)
         return temp
 
-    def get_axix_x_y_z(self) -> Tuple[float, float, float]:
+    def get_axix_x_y_z(self) -> float:
         """
-        :return: (x, y, z)
+        :return: degrees
         """
-        x = math.degrees(self.get_convert_data_signet_int()[0] / self.sensitivity_mag)
-        y = math.degrees(self.get_convert_data_signet_int()[1] / self.sensitivity_mag)
-        z = math.degrees(self.get_convert_data_signet_int()[2] / self.sensitivity_mag)
-        return (x, y, z)
+        x = self.get_convert_data_signet_int()[0] / self.sensitivity_mag
+        y = self.get_convert_data_signet_int()[1] / self.sensitivity_mag
+        z = self.get_convert_data_signet_int()[2] / self.sensitivity_mag
+        
+        if x is None or y is None:
+            return None
+        else:
+            degrees = math.degrees(math.atan2(y, x))
+            if degrees < 0:
+                degrees += 360.0
+            return degrees
 
 
 m = QMC5883L()
