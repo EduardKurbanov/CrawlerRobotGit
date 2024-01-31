@@ -8,7 +8,7 @@ import math
 class QMC5883L(object):
     """
         for mini computer PocketBeagle®,
-        model compass magnetometer: HMC5883L,
+        model compass magnetometer: QMC5883L,
         protocol: i2c,
         i2c_pin_sda: 'P1_26'
         i2c_pin_scl: 'P1_28'
@@ -57,22 +57,30 @@ class QMC5883L(object):
     _TEMPERATURE_SENSOR_SENSITIVITY = 100
 
     def __init__(self, i2c: int = 2):
+        """It works fine for me with these settings.
+        self.mode_cont = (
+                self._REG_MODE_CONTROL_CONTINUOUS |
+                self._REG_DATA_UPDATE_RATE_ODR_50HZ |
+                self._REG_FULL_SCALE_RNG_2G |
+                self._REG_OVERSAMPLING_OSR_128
+        )
+        """
         print('---start_init---')
         self.i2c_bus = smbus2.SMBus(i2c)  # I2C bus number used, may sometimes change on your system
         self.__check_error()
         self.mode_cont = (
                 self._REG_MODE_CONTROL_CONTINUOUS |
                 self._REG_DATA_UPDATE_RATE_ODR_50HZ |
-                self._REG_FULL_SCALE_RNG_8G |
-                self._REG_OVERSAMPLING_OSR_512
+                self._REG_FULL_SCALE_RNG_2G |
+                self._REG_OVERSAMPLING_OSR_128
         )
-        self.sensitivity_mag = self._FIELD_RANGE_SENSITIVITY_8G_3000LSB_G
+        self.sensitivity_mag = self._FIELD_RANGE_SENSITIVITY_2G_12000LSB_G
         self.__write_i2c_bus_byte(self._REG_QMC5883L_CONF_2, self._REG_SOFT_RST)
         self.__write_i2c_bus_byte(self._REG_QMC5883L_CONF_2, self._REG_INT_ENB)
         self.__write_i2c_bus_byte(self._REG_QMC5883L_SET_RESET_PERIOD, 0x01)
         self.__write_i2c_bus_byte(self._REG_QMC5883L_CONF_1, self.mode_cont)
 
-        self.__declination = 8.22
+        self.__declination = 0.0
         self.__calibration = [[1.0, 0.0, 0.0],
                              [0.0, 1.0, 0.0],
                              [0.0, 0.0, 1.0]]
@@ -110,6 +118,28 @@ class QMC5883L(object):
         temp_signet_int = self.__register_shift(t_h, t_l)
         return (axix_x_signet_int, axix_y_signet_int, axix_z_signet_int, temp_signet_int)
 
+    def set_declination(self, value):
+        """Set the magnetic declination, in degrees."""
+        try:
+            degrees = float(value)
+            if d < -180.0 or degrees > 180.0:
+                logging.error(u'Declination must be >= -180 and <= 180.')
+            else:
+                self.__declination = degrees
+        except:
+            logging.error(u'Declination must be a float value.')
+
+    def set_calibration(self, value):
+        """Set the 3x3 matrix for horizontal (x, y) magnetic vector calibration."""
+        c = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        try:
+            for i in range(0, 3):
+                for j in range(0, 3):
+                    c[i][j] = float(value[i][j])
+            self.__calibration = c
+        except:
+            logging.error(u'Calibration must be a 3x3 float matrix.')
+
     def get_temp(self) -> float:
         """
         :return: temp
@@ -117,7 +147,7 @@ class QMC5883L(object):
         temp = ((self.__convert_data_signet_int()[3]) / self._TEMPERATURE_SENSOR_SENSITIVITY)
         return temp
 
-    def get_axix_x_y_z(self) -> Tuple:
+    def get_magnetic_field_LSB_data(self):
         """
         :return: (x, y, z)
         """
@@ -127,9 +157,17 @@ class QMC5883L(object):
         
         return (x, y, z)
 
-    def get_magnet(self) -> List:
+    def get_magnetic_field_data(self) -> Tuple:
+        """
+        :return: (x, y, z)
+        """
+        (x, y, z, t) = self.__convert_data_signet_int()
+        
+        return (x, y, z)
+
+    def get_magnet_field(self) -> List:
         """Return the horizontal magnetic sensor vector with (x, y) calibration applied."""
-        [x, y, z] = self.get_axix_x_y_z()
+        [x, y, z] = self.get_magnetic_field_data()
         if x is None or y is None:
             [x1, y1] = [x, y]
         else:
@@ -140,7 +178,7 @@ class QMC5883L(object):
 
     def get_bearing_raw(self) -> float:
         """Horizontal bearing (in degrees) from magnetic value X and Y."""
-        [x, y, z] = self.get_axix_x_y_z()
+        [x, y, z] = self.get_magnetic_field_data()
         if x is None or y is None:
             return None
         else:
@@ -151,7 +189,7 @@ class QMC5883L(object):
 
     def get_bearing(self) -> float:
         """Horizontal bearing, adjusted by calibration and declination."""
-        [x, y] = self.get_magnet()
+        [x, y] = self.get_magnet_field()
         if x is None or y is None:
             return None
         else:
@@ -165,8 +203,15 @@ class QMC5883L(object):
                 degrees -= 360.0
         return degrees
 
+k2g = [[1.0086972793142255, -0.04161991734605183, 1788.4219998515782], 
+       [-0.04161991734605183, 1.1991677462926738, 586.365808229903], 
+                                                    [0.0, 0.0, 1.0]]
+
+mag_declination = 8.22
 
 m = QMC5883L()
+m.set_declination(mag_declination)
+m.set_calibration(k2g)
 while True:
     print(m.get_temp())
     print(m.get_bearing())
