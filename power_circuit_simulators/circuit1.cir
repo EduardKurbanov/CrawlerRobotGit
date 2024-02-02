@@ -382,7 +382,7 @@ Style=8192
 
 [Attr]
 ON=6,32,VALUE
-V=5.5
+V=5
 Style=8192
 
 [Attr]
@@ -515,7 +515,7 @@ Style=8192
 
 [Attr]
 ON=4,33,VALUE
-V=12.6
+V=10.5
 Style=8192
 
 [Attr]
@@ -538,8 +538,8 @@ V=R3
 Style=8192
 
 [Attr]
-ON=-40,-39,RESISTANCE
-V=20k
+ON=-39,-39,RESISTANCE
+V=2k
 Style=8192
 
 [Attr]
@@ -557,8 +557,8 @@ V=R4
 Style=8192
 
 [Attr]
-ON=-40,-38,RESISTANCE
-V=10k
+ON=-39,-39,RESISTANCE
+V=1.5k
 Style=8192
 
 [Attr]
@@ -1041,7 +1041,7 @@ Style=8192
 
 [Attr]
 ON=-40,-39,RESISTANCE
-V=20K
+V=2K
 Style=8192
 
 [Attr]
@@ -1060,7 +1060,7 @@ Style=8192
 
 [Attr]
 ON=-40,-39,RESISTANCE
-V=12K
+V=1.5k
 Style=8192
 
 [Attr]
@@ -1649,9 +1649,8 @@ PrinterScale=1
 Scale 0=1
 Scale 1=1
 Scale 2=1
-SB 3=0,304
 Scale 3=1
-Px=117,322
+Px=92,545
 WinBackGround Color=#FFFFFF
 Select Color=#FF0000
 Anchor Color=#000000
